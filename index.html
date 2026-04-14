@@ -363,18 +363,18 @@
     <section id="startScreen" class="screen active">
       <div class="card hero">
         <h1>🎮 不规则动词课堂互动游戏</h1>
-        <p>50个高频不规则动词 · 投屏友好 · 快节奏课堂互动</p>
+        <p>保留过去分词练习 + 新增现在完成时句子挑战 · 投屏友好</p>
       </div>
 
       <div class="card">
         <div class="setting-grid">
           <div class="setting">
-            <h3>① 选择游戏模式</h3>
-            <div id="modeChips" class="chips"></div>
+            <h3>① 选择练习关卡</h3>
+            <div id="lessonChips" class="chips"></div>
           </div>
-          <div class="setting">
-            <h3>② 练习目标</h3>
-            <div id="tenseChips" class="chips"></div>
+          <div id="modeSetting" class="setting">
+            <h3>② 过去分词玩法</h3>
+            <div id="modeChips" class="chips"></div>
           </div>
           <div class="setting">
             <h3>③ 课堂设置</h3>
@@ -382,7 +382,7 @@
               <button id="toggleSound" class="chip active" type="button">🔊 音效：开</button>
               <button id="toggleWrongOnly" class="chip" type="button">错题优先：关</button>
             </div>
-            <p class="mini">提示：数字键 1-4 可选答案，Enter 可提交（输入题）。</p>
+            <p class="mini">提示：数字键 1-4 可选答案，Enter 可提交。句子关卡里也支持快速作答。</p>
           </div>
         </div>
         <div class="btn-row">
@@ -524,21 +524,38 @@
       { base: "write", past: ["wrote"], pp: ["written"], zh: "写" }
     ];
 
-    const MODES = {
+    // ===== 新增：现在完成时句子挑战题库（后续可直接增减） =====
+    const PRESENT_PERFECT_SENTENCES = [
+      { subject: "I", aux: "have", pastParticiple: "eaten", object: "an apple", fullSentence: "I have eaten an apple.", zh: "我吃过一个苹果。" },
+      { subject: "I", aux: "have", pastParticiple: "done", object: "my homework", fullSentence: "I have done my homework.", zh: "我已经做了作业。" },
+      { subject: "He", aux: "has", pastParticiple: "seen", object: "a bird", fullSentence: "He has seen a bird.", zh: "他看见过一只鸟。" },
+      { subject: "She", aux: "has", pastParticiple: "ridden", object: "a bike", fullSentence: "She has ridden a bike.", zh: "她骑过自行车。" },
+      { subject: "We", aux: "have", pastParticiple: "gone", object: "to the zoo", fullSentence: "We have gone to the zoo.", zh: "我们去过动物园。" },
+      { subject: "They", aux: "have", pastParticiple: "broken", object: "a toy", fullSentence: "They have broken a toy.", zh: "他们弄坏了一个玩具。" },
+      { subject: "She", aux: "has", pastParticiple: "written", object: "a letter", fullSentence: "She has written a letter.", zh: "她写过一封信。" },
+      { subject: "He", aux: "has", pastParticiple: "drawn", object: "a picture", fullSentence: "He has drawn a picture.", zh: "他画过一幅画。" },
+      { subject: "They", aux: "have", pastParticiple: "sung", object: "a song", fullSentence: "They have sung a song.", zh: "他们唱过一首歌。" },
+      { subject: "We", aux: "have", pastParticiple: "read", object: "a book", fullSentence: "We have read a book.", zh: "我们读过一本书。" },
+      { subject: "I", aux: "have", pastParticiple: "ridden", object: "a bike", fullSentence: "I have ridden a bike.", zh: "我骑过自行车。" },
+      { subject: "She", aux: "has", pastParticiple: "done", object: "homework", fullSentence: "She has done homework.", zh: "她做了作业。" }
+    ];
+
+    const LESSON_TYPES = {
+      pp_game: { label: "过去分词练习" },
+      sentence_game: { label: "现在完成时句子挑战" }
+    };
+
+    const PP_MODES = {
       match: { label: "配对闯关", rounds: 20, timed: false },
       double: { label: "拼写挑战", rounds: 20, timed: false },
       speed: { label: "竞速模式", rounds: 50, timed: true, seconds: 60 }
     };
 
-    const TENSE_TYPES = {
-      pp: "只练过去分词"
-    };
-
     const praise = ["太棒了！", "答得漂亮！", "继续连击！", "课堂MVP！", "稳住节奏！"];
 
     const state = {
+      lessonType: "pp_game",
       mode: "match",
-      tenseType: "pp",
       soundOn: true,
       wrongOnly: false,
       queue: [],
@@ -563,8 +580,9 @@
       result: $("resultScreen")
     };
 
+    const lessonChips = $("lessonChips");
     const modeChips = $("modeChips");
-    const tenseChips = $("tenseChips");
+    const modeSetting = $("modeSetting");
     const choiceArea = $("choiceArea");
     const inputArea = $("inputArea");
     const submitBtn = $("submitBtn");
@@ -587,10 +605,6 @@
 
     function normalize(str) {
       return (str || "").trim().toLowerCase();
-    }
-
-    function resolveTargetField() {
-      return "pp";
     }
 
     function safeBeep(ok = true) {
@@ -626,25 +640,26 @@
     }
 
     function renderChips() {
-      modeChips.innerHTML = Object.entries(MODES).map(([key, m]) =>
-        `<button type="button" class="chip ${state.mode === key ? "active" : ""}" data-mode="${key}">${m.label}</button>`
+      lessonChips.innerHTML = Object.entries(LESSON_TYPES).map(([key, m]) =>
+        `<button type="button" class="chip ${state.lessonType === key ? "active" : ""}" data-lesson="${key}">${m.label}</button>`
       ).join("");
 
-      tenseChips.innerHTML = Object.entries(TENSE_TYPES).map(([key, label]) =>
-        `<button type="button" class="chip ${state.tenseType === key ? "active" : ""}" data-tense="${key}">${label}</button>`
+      modeSetting.style.display = state.lessonType === "pp_game" ? "block" : "none";
+      modeChips.innerHTML = Object.entries(PP_MODES).map(([key, m]) =>
+        `<button type="button" class="chip ${state.mode === key ? "active" : ""}" data-mode="${key}">${m.label}</button>`
       ).join("");
     }
 
     function updateStatus() {
       const total = state.queue.length + state.answered;
-      $("modeLabel").textContent = MODES[state.mode].label;
+      $("modeLabel").textContent = state.lessonType === "pp_game" ? PP_MODES[state.mode].label : LESSON_TYPES[state.lessonType].label;
       $("scoreLabel").textContent = state.score;
       $("comboLabel").textContent = `x${state.combo}`;
       $("progressLabel").textContent = `${state.answered}/${total}`;
       $("remainLabel").textContent = state.queue.length;
       const percent = total ? (state.answered / total) * 100 : 0;
       $("progressFill").style.width = `${percent}%`;
-      if (state.mode === "speed") {
+      if (state.lessonType === "pp_game" && state.mode === "speed") {
         $("timerWrap").hidden = false;
         $("timerLabel").textContent = state.remainSeconds;
       } else {
@@ -661,15 +676,25 @@
     }
 
     function buildQueue() {
+      if (state.lessonType === "sentence_game") {
+        const pool = state.wrongOnly && state.wrongItems.length
+          ? state.wrongItems.map(item => item.data)
+          : PRESENT_PERFECT_SENTENCES;
+        const rounds = Math.min(16, pool.length);
+        state.queue = shuffle(pool).slice(0, rounds).map((item) => ({
+          lessonType: "sentence_game",
+          data: item,
+          questionType: Math.random() > 0.45 ? "choose_pp" : "qa"
+        }));
+        return;
+      }
+
       const pool = state.wrongOnly && state.wrongItems.length
         ? state.wrongItems.map(item => item.verb)
         : VERBS;
       const picked = shuffle(pool);
-      const rounds = Math.min(MODES[state.mode].rounds, picked.length);
-      state.queue = picked.slice(0, rounds).map(v => ({ verb: v, targetField: resolveTargetField() }));
-      if (state.mode === "double") {
-        state.queue = picked.slice(0, rounds).map(v => ({ verb: v, targetField: "pp" }));
-      }
+      const rounds = Math.min(PP_MODES[state.mode].rounds, picked.length);
+      state.queue = picked.slice(0, rounds).map(v => ({ lessonType: "pp_game", verb: v, targetField: "pp" }));
     }
 
     function startGame() {
@@ -680,19 +705,15 @@
       state.answered = 0;
       state.correct = 0;
       state.answeredLocked = false;
-      if (!state.wrongRetryMode) {
-        state.wrongItems = [];
-      }
+      if (!state.wrongRetryMode) state.wrongItems = [];
 
       buildQueue();
-      if (state.mode === "speed") {
-        state.remainSeconds = MODES.speed.seconds;
+      if (state.lessonType === "pp_game" && state.mode === "speed") {
+        state.remainSeconds = PP_MODES.speed.seconds;
         state.timer = setInterval(() => {
           state.remainSeconds -= 1;
           updateStatus();
-          if (state.remainSeconds <= 0) {
-            endGame();
-          }
+          if (state.remainSeconds <= 0) endGame();
         }, 1000);
       }
       showScreen("game");
@@ -700,12 +721,38 @@
       updateStatus();
     }
 
-    function buildChoices(correctAns, fieldName) {
-      const wrongPool = shuffle(VERBS
-        .map(v => v[fieldName][0])
-        .filter(item => normalize(item) !== normalize(correctAns))
-      ).slice(0, 3);
+    function buildChoices(correctAns, pool) {
+      const wrongPool = shuffle(pool.filter(item => normalize(item) !== normalize(correctAns))).slice(0, 3);
       return shuffle([correctAns, ...wrongPool]);
+    }
+
+    function buildSentenceQuestion(item) {
+      const { data, questionType } = item;
+      if (questionType === "qa") {
+        const question = `Have you ever ${data.pastParticiple} ${data.object}?`;
+        const shouldYes = Math.random() > 0.5;
+        return {
+          type: "qa",
+          main: question,
+          sub: `提示：选择一个自然回答（${data.zh}）`,
+          options: ["Yes, I have.", "No, I haven't."],
+          answer: shouldYes ? "Yes, I have." : "No, I haven't.",
+          answerText: shouldYes ? "Yes, I have." : "No, I haven't.",
+          explain: "问答搭配练习"
+        };
+      }
+
+      const stem = `${data.subject} ${data.aux} ___ ${data.object}.`;
+      const ppPool = [...new Set(PRESENT_PERFECT_SENTENCES.map(s => s.pastParticiple))];
+      return {
+        type: "choose_pp",
+        main: stem,
+        sub: `中文：${data.zh}`,
+        options: buildChoices(data.pastParticiple, ppPool),
+        answer: data.pastParticiple,
+        answerText: data.fullSentence,
+        explain: "选择正确过去分词"
+      };
     }
 
     function renderNextQuestion() {
@@ -713,6 +760,7 @@
       nextBtn.hidden = true;
       choiceArea.innerHTML = "";
       submitBtn.hidden = true;
+      submitBtn.disabled = false;
       inputArea.hidden = true;
 
       if (!state.queue.length) {
@@ -721,7 +769,29 @@
       }
 
       state.current = state.queue.shift();
-      const { verb, targetField } = state.current;
+
+      if (state.current.lessonType === "sentence_game") {
+        const q = buildSentenceQuestion(state.current);
+        state.current.view = q;
+        $("questionType").textContent = `现在完成时句子挑战：${q.explain}`;
+        $("questionMain").textContent = q.main;
+        $("questionSub").textContent = q.sub;
+        state.options = q.options;
+        state.options.forEach((opt, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "choice-btn";
+          btn.type = "button";
+          btn.dataset.index = idx;
+          btn.innerHTML = `<small>${idx + 1}</small>${opt}`;
+          btn.addEventListener("click", () => handleChoice(idx));
+          choiceArea.appendChild(btn);
+        });
+        setFeedback("来试试吧！选出最合适的答案。", "idle");
+        updateStatus();
+        return;
+      }
+
+      const { verb } = state.current;
       $("questionMain").textContent = verb.base;
       $("questionSub").textContent = `中文：${verb.zh}`;
 
@@ -733,8 +803,8 @@
         $("ppInput").focus();
       } else {
         $("questionType").textContent = "配对选择：请选择正确的过去分词（pp）";
-        const correct = verb[targetField][0];
-        state.options = buildChoices(correct, targetField);
+        const correct = verb.pp[0];
+        state.options = buildChoices(correct, VERBS.map(v => v.pp[0]));
 
         state.options.forEach((opt, idx) => {
           const btn = document.createElement("button");
@@ -765,30 +835,46 @@
     }
 
     function rememberWrong() {
-      const exists = state.wrongItems.some(item => item.verb.base === state.current.verb.base);
+      const key = state.current.lessonType === "sentence_game"
+        ? state.current.data.fullSentence
+        : state.current.verb.base;
+      const exists = state.wrongItems.some(item => (item.data?.fullSentence || item.verb?.base) === key);
       if (!exists) state.wrongItems.push({ ...state.current });
     }
 
     function lockQuestion() {
       state.answeredLocked = true;
       state.answered += 1;
-      nextBtn.hidden = state.mode === "speed";
+      nextBtn.hidden = (state.lessonType === "pp_game" && state.mode === "speed");
       submitBtn.disabled = true;
       updateStatus();
     }
 
+    function getCurrentAnswer() {
+      if (state.current.lessonType === "sentence_game") {
+        return {
+          rightValues: [state.current.view.answer],
+          rightText: state.current.view.answerText
+        };
+      }
+      return {
+        rightValues: state.current.verb.pp,
+        rightText: state.current.verb.pp.join(" / ")
+      };
+    }
+
     function handleChoice(index) {
       if (state.answeredLocked) return;
-      const { verb, targetField } = state.current;
       const chosen = state.options[index];
-      const right = verb[targetField].map(normalize).includes(normalize(chosen));
+      const ans = getCurrentAnswer();
+      const right = ans.rightValues.map(normalize).includes(normalize(chosen));
       const bonus = gainScore(right);
 
       const buttons = [...choiceArea.querySelectorAll(".choice-btn")];
       buttons.forEach((btn, i) => {
         btn.classList.add("locked");
         const text = state.options[i];
-        const isRight = verb[targetField].map(normalize).includes(normalize(text));
+        const isRight = ans.rightValues.map(normalize).includes(normalize(text));
         if (isRight) btn.classList.add("correct");
         if (i === index && !right) btn.classList.add("wrong");
       });
@@ -800,19 +886,17 @@
       } else {
         safeBeep(false);
         rememberWrong();
-        const ans = verb[targetField].join(" / ");
-        setFeedback(`❌ 正确答案：${ans}。别灰心，下一题拿分！`, "bad");
+        setFeedback(`❌ 正确答案：${ans.rightText}`, "bad");
       }
 
       lockQuestion();
-      if (state.mode === "speed") setTimeout(renderNextQuestion, 550);
+      if (state.lessonType === "pp_game" && state.mode === "speed") setTimeout(renderNextQuestion, 550);
     }
 
     function handleDoubleSubmit() {
-      if (state.answeredLocked) return;
-      const { verb } = state.current;
+      if (state.answeredLocked || state.current.lessonType !== "pp_game") return;
       const p2 = normalize($("ppInput").value);
-      const right = verb.pp.map(normalize).includes(p2);
+      const right = state.current.verb.pp.map(normalize).includes(p2);
       const bonus = gainScore(right);
 
       if (right) {
@@ -822,7 +906,7 @@
       } else {
         safeBeep(false);
         rememberWrong();
-        setFeedback(`❌ 正确答案：${verb.pp.join("/")}`, "bad");
+        setFeedback(`❌ 正确答案：${state.current.verb.pp.join("/")}`, "bad");
       }
 
       lockQuestion();
@@ -854,17 +938,17 @@
     }
 
     function bindEvents() {
+      lessonChips.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-lesson]");
+        if (!btn) return;
+        state.lessonType = btn.dataset.lesson;
+        renderChips();
+      });
+
       modeChips.addEventListener("click", (e) => {
         const btn = e.target.closest("[data-mode]");
         if (!btn) return;
         state.mode = btn.dataset.mode;
-        renderChips();
-      });
-
-      tenseChips.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-tense]");
-        if (!btn) return;
-        state.tenseType = btn.dataset.tense;
         renderChips();
       });
 
@@ -886,10 +970,7 @@
       });
 
       submitBtn.addEventListener("click", handleDoubleSubmit);
-      nextBtn.addEventListener("click", () => {
-        submitBtn.disabled = false;
-        renderNextQuestion();
-      });
+      nextBtn.addEventListener("click", renderNextQuestion);
 
       $("backBtn").addEventListener("click", () => {
         clearInterval(state.timer);
@@ -916,14 +997,13 @@
 
       document.addEventListener("keydown", (e) => {
         if (!screens.game.classList.contains("active")) return;
-        if (state.mode !== "double" && !state.answeredLocked && ["1", "2", "3", "4"].includes(e.key)) {
+        if (!state.answeredLocked && ["1", "2", "3", "4"].includes(e.key)) {
           handleChoice(Number(e.key) - 1);
         }
         if (e.key === "Enter") {
-          if (state.mode === "double" && !submitBtn.hidden) {
+          if (state.lessonType === "pp_game" && state.mode === "double" && !submitBtn.hidden) {
             handleDoubleSubmit();
           } else if (state.answeredLocked && !nextBtn.hidden) {
-            submitBtn.disabled = false;
             renderNextQuestion();
           }
         }
