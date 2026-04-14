@@ -373,7 +373,7 @@
             <div id="modeChips" class="chips"></div>
           </div>
           <div class="setting">
-            <h3>② 选择练习类型</h3>
+            <h3>② 练习目标</h3>
             <div id="tenseChips" class="chips"></div>
           </div>
           <div class="setting">
@@ -430,10 +430,6 @@
         <div id="choiceArea" class="choices"></div>
 
         <div id="inputArea" class="input-row" hidden>
-          <div class="input-wrap">
-            <label for="pastInput">过去式（past）</label>
-            <input id="pastInput" autocomplete="off" placeholder="输入过去式" />
-          </div>
           <div class="input-wrap">
             <label for="ppInput">过去分词（pp）</label>
             <input id="ppInput" autocomplete="off" placeholder="输入过去分词" />
@@ -530,21 +526,19 @@
 
     const MODES = {
       match: { label: "配对闯关", rounds: 20, timed: false },
-      double: { label: "双空挑战", rounds: 20, timed: false },
+      double: { label: "拼写挑战", rounds: 20, timed: false },
       speed: { label: "竞速模式", rounds: 50, timed: true, seconds: 60 }
     };
 
     const TENSE_TYPES = {
-      past: "只练过去式",
-      pp: "只练过去分词",
-      mixed: "混合练习"
+      pp: "只练过去分词"
     };
 
     const praise = ["太棒了！", "答得漂亮！", "继续连击！", "课堂MVP！", "稳住节奏！"];
 
     const state = {
       mode: "match",
-      tenseType: "mixed",
+      tenseType: "pp",
       soundOn: true,
       wrongOnly: false,
       queue: [],
@@ -596,8 +590,7 @@
     }
 
     function resolveTargetField() {
-      if (state.tenseType === "mixed") return Math.random() > 0.5 ? "past" : "pp";
-      return state.tenseType;
+      return "pp";
     }
 
     function safeBeep(ok = true) {
@@ -675,7 +668,7 @@
       const rounds = Math.min(MODES[state.mode].rounds, picked.length);
       state.queue = picked.slice(0, rounds).map(v => ({ verb: v, targetField: resolveTargetField() }));
       if (state.mode === "double") {
-        state.queue = picked.slice(0, rounds).map(v => ({ verb: v, targetField: "both" }));
+        state.queue = picked.slice(0, rounds).map(v => ({ verb: v, targetField: "pp" }));
       }
     }
 
@@ -733,15 +726,13 @@
       $("questionSub").textContent = `中文：${verb.zh}`;
 
       if (state.mode === "double") {
-        $("questionType").textContent = "双空挑战：请同时填写过去式和过去分词";
+        $("questionType").textContent = "拼写挑战：请输入过去分词（pp）";
         inputArea.hidden = false;
         submitBtn.hidden = false;
-        $("pastInput").value = "";
         $("ppInput").value = "";
-        $("pastInput").focus();
+        $("ppInput").focus();
       } else {
-        const label = targetField === "past" ? "过去式（past）" : "过去分词（pp）";
-        $("questionType").textContent = `配对选择：请选择 ${label}`;
+        $("questionType").textContent = "配对选择：请选择正确的过去分词（pp）";
         const correct = verb[targetField][0];
         state.options = buildChoices(correct, targetField);
 
@@ -820,21 +811,18 @@
     function handleDoubleSubmit() {
       if (state.answeredLocked) return;
       const { verb } = state.current;
-      const p1 = normalize($("pastInput").value);
       const p2 = normalize($("ppInput").value);
-      const ok1 = verb.past.map(normalize).includes(p1);
-      const ok2 = verb.pp.map(normalize).includes(p2);
-      const right = ok1 && ok2;
+      const right = verb.pp.map(normalize).includes(p2);
       const bonus = gainScore(right);
 
       if (right) {
         safeBeep(true);
         const tail = bonus ? ` 连击奖励 +${bonus} 分！` : "";
-        setFeedback(`✅ 双空全对！ +10分！${tail}`, "good");
+        setFeedback(`✅ 拼写正确！ +10分！${tail}`, "good");
       } else {
         safeBeep(false);
         rememberWrong();
-        setFeedback(`❌ 正确：past=${verb.past.join("/")}，pp=${verb.pp.join("/")}`, "bad");
+        setFeedback(`❌ 正确答案：${verb.pp.join("/")}`, "bad");
       }
 
       lockQuestion();
