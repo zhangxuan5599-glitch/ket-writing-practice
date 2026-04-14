@@ -3,150 +3,479 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>50个常见不规则动词练习</title>
+  <title>不规则动词课堂互动游戏（50词）</title>
   <style>
     :root {
-      --bg: #f6f8fb;
+      --bg: #f2f6ff;
       --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --primary: #2563eb;
+      --ink: #1f2a44;
+      --muted: #61708f;
+      --primary: #3b82f6;
+      --primary-deep: #2563eb;
       --good: #16a34a;
       --bad: #dc2626;
-      --border: #e5e7eb;
+      --warn: #f59e0b;
+      --border: #dce5f7;
+      --shadow: 0 14px 30px rgba(37, 99, 235, 0.12);
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.5;
+      color: var(--ink);
+      background: radial-gradient(circle at 20% 10%, #ffffff 0%, #edf3ff 45%, #e6eeff 100%);
     }
-    .container {
-      max-width: 1000px;
-      margin: 32px auto;
-      padding: 0 16px 32px;
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
     }
+
+    .screen {
+      display: none;
+      animation: fade .25s ease;
+    }
+
+    .screen.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.04);
-      padding: 20px;
-      margin-bottom: 18px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 16px;
     }
-    h1, h2 { margin: 0 0 12px; }
-    p { margin: 0 0 10px; color: var(--muted); }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      overflow: hidden;
-      border-radius: 10px;
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 1px;
     }
-    th, td {
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      padding: 10px 8px;
-      font-size: 14px;
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 20px);
     }
-    th { background: #f9fafb; }
-    tr:hover td { background: #fafcff; }
-    .controls {
+
+    .setting-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .setting h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .chips {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 12px;
+    }
+
+    .chip {
+      border: 2px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: #fff;
+      font-size: 17px;
+      cursor: pointer;
+      user-select: none;
+      transition: .15s;
+    }
+
+    .chip.active {
+      border-color: var(--primary);
+      background: #eff6ff;
+      color: var(--primary-deep);
+      font-weight: 700;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
       align-items: center;
     }
+
     button {
       border: none;
-      background: var(--primary);
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 8px;
+      border-radius: 14px;
+      padding: 12px 20px;
+      font-size: 20px;
+      font-weight: 700;
       cursor: pointer;
-      font-size: 14px;
+      transition: transform .08s ease, opacity .2s;
     }
-    button.secondary { background: #4b5563; }
-    button:disabled { opacity: .5; cursor: not-allowed; }
-    input {
-      width: 220px;
+
+    button:active { transform: scale(.98); }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+      color: #fff;
+    }
+
+    .btn-sub {
+      background: #e5ecfc;
+      color: #274690;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .status-bar {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .status-item {
+      background: #f8fbff;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 9px 10px;
-      font-size: 14px;
+      border-radius: 14px;
+      padding: 10px;
+      text-align: center;
+      min-height: 82px;
     }
-    .row {
+
+    .status-item .label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .status-item .value {
+      margin-top: 6px;
+      font-size: clamp(22px, 2.8vw, 36px);
+      font-weight: 800;
+    }
+
+    .question-area {
+      text-align: center;
+      padding: 24px;
+    }
+
+    .question-type {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .question-main {
+      font-size: clamp(32px, 5vw, 64px);
+      font-weight: 900;
+      letter-spacing: 1px;
+      line-height: 1.2;
+    }
+
+    .question-sub {
+      font-size: clamp(20px, 2.4vw, 32px);
+      color: #3b4b6b;
+      margin-top: 8px;
+    }
+
+    .choices {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-top: 10px;
+      margin-top: 14px;
     }
-    .feedback { font-weight: 700; margin-top: 10px; }
-    .ok { color: var(--good); }
-    .err { color: var(--bad); }
-    .score {
-      font-size: 16px;
+
+    .choice-btn {
+      border: 2px solid #d7e4ff;
+      background: #f8fbff;
+      border-radius: 14px;
+      padding: 18px 14px;
+      font-size: clamp(24px, 3.2vw, 38px);
       font-weight: 700;
-      color: #111827;
+      color: #1f2a44;
+      cursor: pointer;
+      position: relative;
+      min-height: 96px;
     }
-    .small { font-size: 13px; color: var(--muted); }
-    @media (max-width: 700px) {
-      .row { grid-template-columns: 1fr; }
-      input { width: 100%; }
+
+    .choice-btn small {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      color: #7b8cab;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .choice-btn.correct { border-color: #22c55e; background: #ecfdf5; }
+    .choice-btn.wrong { border-color: #ef4444; background: #fef2f2; }
+    .choice-btn.locked { pointer-events: none; }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .input-wrap label {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 6px;
+      color: #304161;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      border: 2px solid #d9e4ff;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .input-wrap input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.15);
+    }
+
+    .feedback {
+      margin-top: 16px;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 800;
+      text-align: center;
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feedback.good { background: #ecfdf5; color: #166534; border: 2px solid #bbf7d0; }
+    .feedback.bad { background: #fef2f2; color: #991b1b; border: 2px solid #fecaca; }
+    .feedback.idle { background: #f4f7ff; color: #50618a; border: 2px dashed #d3def7; }
+
+    .progress-track {
+      margin-top: 10px;
+      height: 14px;
+      border-radius: 999px;
+      background: #e8efff;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      transition: width .2s ease;
+    }
+
+    .timer-wrap {
+      margin-top: 8px;
+      font-weight: 700;
+      color: #475f92;
+    }
+
+    .result-score {
+      font-size: clamp(40px, 8vw, 84px);
+      font-weight: 900;
+      text-align: center;
+      color: #1e40af;
+      margin: 8px 0;
+    }
+
+    .medal {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .mini {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    details {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fbfdff;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e5ecff;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th { background: #f4f8ff; }
+
+    .highlight {
+      animation: pop .3s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 900px) {
+      .status-bar { grid-template-columns: 1fr 1fr; }
+      .choices { grid-template-columns: 1fr; }
+      .input-row { grid-template-columns: 1fr; }
+      button { width: 100%; }
+      .btn-row { flex-direction: column; align-items: stretch; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>动词过去式 & 过去分词练习（50个常见不规则动词）</h1>
-      <p>使用说明：先看下方词表，再在练习区输入过去式（Past Simple）和过去分词（Past Participle）。</p>
-    </div>
+  <div class="wrap">
+    <section id="startScreen" class="screen active">
+      <div class="card hero">
+        <h1>🎮 不规则动词课堂互动游戏</h1>
+        <p>50个高频不规则动词 · 投屏友好 · 快节奏课堂互动</p>
+      </div>
 
-    <div class="card">
-      <h2>📚 词表（50个）</h2>
-      <table id="verbTable">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>原形（Base）</th>
-            <th>过去式（Past）</th>
-            <th>过去分词（P.P.）</th>
-            <th>中文</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <h2>📝 随机练习</h2>
-      <p class="small">支持大小写不敏感；如果有两种拼写（如 learned/learnt），都可判对。</p>
-      <div id="question" class="score"></div>
-      <div class="row">
-        <div>
-          <label for="pastInput">过去式（Past）</label><br/>
-          <input id="pastInput" type="text" placeholder="请输入过去式" />
+      <div class="card">
+        <div class="setting-grid">
+          <div class="setting">
+            <h3>① 选择游戏模式</h3>
+            <div id="modeChips" class="chips"></div>
+          </div>
+          <div class="setting">
+            <h3>② 选择练习类型</h3>
+            <div id="tenseChips" class="chips"></div>
+          </div>
+          <div class="setting">
+            <h3>③ 课堂设置</h3>
+            <div class="chips">
+              <button id="toggleSound" class="chip active" type="button">🔊 音效：开</button>
+              <button id="toggleWrongOnly" class="chip" type="button">错题优先：关</button>
+            </div>
+            <p class="mini">提示：数字键 1-4 可选答案，Enter 可提交（输入题）。</p>
+          </div>
         </div>
-        <div>
-          <label for="ppInput">过去分词（Past Participle）</label><br/>
-          <input id="ppInput" type="text" placeholder="请输入过去分词" />
+        <div class="btn-row">
+          <button id="startBtn" class="btn-main" type="button">开始游戏</button>
         </div>
       </div>
-      <div class="controls">
-        <button id="checkBtn">检查答案</button>
-        <button id="nextBtn" class="secondary">下一题</button>
-        <button id="restartBtn" class="secondary">重置分数</button>
-        <span class="score" id="score">得分：0 / 0</span>
+
+      <div class="card">
+        <details>
+          <summary>📚 查看内置词库（50词）</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>原形（base）</th>
+                <th>过去式（past）</th>
+                <th>过去分词（pp）</th>
+                <th>中文（zh）</th>
+              </tr>
+            </thead>
+            <tbody id="verbTableBody"></tbody>
+          </table>
+        </details>
       </div>
-      <div id="feedback" class="feedback"></div>
-    </div>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <div class="card">
+        <div class="status-bar">
+          <div class="status-item"><div class="label">模式</div><div id="modeLabel" class="value">-</div></div>
+          <div class="status-item"><div class="label">当前得分</div><div id="scoreLabel" class="value">0</div></div>
+          <div class="status-item"><div class="label">连击</div><div id="comboLabel" class="value">0</div></div>
+          <div class="status-item"><div class="label">进度</div><div id="progressLabel" class="value">0/0</div></div>
+          <div class="status-item"><div class="label">剩余</div><div id="remainLabel" class="value">0</div></div>
+        </div>
+        <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+        <div id="timerWrap" class="timer-wrap" hidden>⏱️ 剩余时间：<span id="timerLabel">60</span> 秒</div>
+      </div>
+
+      <div class="card question-area">
+        <div id="questionType" class="question-type"></div>
+        <div id="questionMain" class="question-main"></div>
+        <div id="questionSub" class="question-sub"></div>
+
+        <div id="choiceArea" class="choices"></div>
+
+        <div id="inputArea" class="input-row" hidden>
+          <div class="input-wrap">
+            <label for="pastInput">过去式（past）</label>
+            <input id="pastInput" autocomplete="off" placeholder="输入过去式" />
+          </div>
+          <div class="input-wrap">
+            <label for="ppInput">过去分词（pp）</label>
+            <input id="ppInput" autocomplete="off" placeholder="输入过去分词" />
+          </div>
+        </div>
+
+        <div id="feedback" class="feedback idle">准备好了吗？点击或键盘作答！</div>
+
+        <div class="btn-row" style="justify-content:center;">
+          <button id="submitBtn" class="btn-main" type="button" hidden>提交答案（Enter）</button>
+          <button id="nextBtn" class="btn-sub" type="button" hidden>下一题</button>
+          <button id="backBtn" class="btn-danger" type="button">返回开始页</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="card">
+        <h2 style="margin:0;font-size:34px;text-align:center;">🏁 本轮结束：班级挑战结果</h2>
+        <div id="medal" class="medal">⭐</div>
+        <div id="finalScore" class="result-score">0</div>
+        <p id="resultText" style="text-align:center;font-size:22px;margin:0;"></p>
+        <div class="status-bar" style="margin-top:14px;">
+          <div class="status-item"><div class="label">正确题数</div><div id="correctCount" class="value">0</div></div>
+          <div class="status-item"><div class="label">总作答题数</div><div id="answerCount" class="value">0</div></div>
+          <div class="status-item"><div class="label">正确率</div><div id="accuracy" class="value">0%</div></div>
+          <div class="status-item"><div class="label">最高连击</div><div id="bestCombo" class="value">0</div></div>
+          <div class="status-item"><div class="label">错题数</div><div id="wrongCount" class="value">0</div></div>
+        </div>
+
+        <div class="btn-row" style="justify-content:center; margin-top:16px;">
+          <button id="retryWrongBtn" class="btn-main" type="button">错题再练</button>
+          <button id="playAgainBtn" class="btn-sub" type="button">再来一轮</button>
+          <button id="toHomeBtn" class="btn-danger" type="button">返回首页</button>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
-    const verbs = [
+    // ===== 50个常见不规则动词词库（后续替换最方便的位置） =====
+    const VERBS = [
       { base: "be", past: ["was", "were"], pp: ["been"], zh: "是" },
       { base: "become", past: ["became"], pp: ["become"], zh: "变成" },
       { base: "begin", past: ["began"], pp: ["begun"], zh: "开始" },
@@ -199,77 +528,423 @@
       { base: "write", past: ["wrote"], pp: ["written"], zh: "写" }
     ];
 
-    const tbody = document.querySelector("#verbTable tbody");
-    verbs.forEach((v, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${v.base}</td>
-        <td>${v.past.join(" / ")}</td>
-        <td>${v.pp.join(" / ")}</td>
-        <td>${v.zh}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+    const MODES = {
+      match: { label: "配对闯关", rounds: 20, timed: false },
+      double: { label: "双空挑战", rounds: 20, timed: false },
+      speed: { label: "竞速模式", rounds: 50, timed: true, seconds: 60 }
+    };
 
-    const question = document.getElementById("question");
-    const pastInput = document.getElementById("pastInput");
-    const ppInput = document.getElementById("ppInput");
-    const feedback = document.getElementById("feedback");
-    const scoreEl = document.getElementById("score");
+    const TENSE_TYPES = {
+      past: "只练过去式",
+      pp: "只练过去分词",
+      mixed: "混合练习"
+    };
 
-    let current = null;
-    let total = 0;
-    let correct = 0;
+    const praise = ["太棒了！", "答得漂亮！", "继续连击！", "课堂MVP！", "稳住节奏！"];
 
-    function pickRandom() {
-      current = verbs[Math.floor(Math.random() * verbs.length)];
-      question.textContent = `请填写动词 “${current.base}（${current.zh}）” 的过去式和过去分词`;
-      pastInput.value = "";
-      ppInput.value = "";
-      feedback.textContent = "";
-      feedback.className = "feedback";
-      pastInput.focus();
+    const state = {
+      mode: "match",
+      tenseType: "mixed",
+      soundOn: true,
+      wrongOnly: false,
+      queue: [],
+      current: null,
+      options: [],
+      answeredLocked: false,
+      score: 0,
+      combo: 0,
+      bestCombo: 0,
+      answered: 0,
+      correct: 0,
+      wrongItems: [],
+      timer: null,
+      remainSeconds: 0,
+      wrongRetryMode: false
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const screens = {
+      start: $("startScreen"),
+      game: $("gameScreen"),
+      result: $("resultScreen")
+    };
+
+    const modeChips = $("modeChips");
+    const tenseChips = $("tenseChips");
+    const choiceArea = $("choiceArea");
+    const inputArea = $("inputArea");
+    const submitBtn = $("submitBtn");
+    const nextBtn = $("nextBtn");
+    const feedback = $("feedback");
+
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove("active"));
+      screens[name].classList.add("active");
     }
 
-    function normalize(s) {
-      return s.trim().toLowerCase();
-    }
-
-    function checkAnswer() {
-      const pastAns = normalize(pastInput.value);
-      const ppAns = normalize(ppInput.value);
-      const pastOk = current.past.map(normalize).includes(pastAns);
-      const ppOk = current.pp.map(normalize).includes(ppAns);
-
-      total += 1;
-      if (pastOk && ppOk) {
-        correct += 1;
-        feedback.textContent = "✅ 正确！太棒了！";
-        feedback.className = "feedback ok";
-      } else {
-        feedback.textContent = `❌ 再试试：${current.base} 的过去式是 ${current.past.join("/")}，过去分词是 ${current.pp.join("/")}。`;
-        feedback.className = "feedback err";
+    function shuffle(arr) {
+      const clone = [...arr];
+      for (let i = clone.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [clone[i], clone[j]] = [clone[j], clone[i]];
       }
-      scoreEl.textContent = `得分：${correct} / ${total}`;
+      return clone;
     }
 
-    document.getElementById("checkBtn").addEventListener("click", checkAnswer);
-    document.getElementById("nextBtn").addEventListener("click", pickRandom);
-    document.getElementById("restartBtn").addEventListener("click", () => {
-      total = 0;
-      correct = 0;
-      scoreEl.textContent = "得分：0 / 0";
-      pickRandom();
-    });
+    function normalize(str) {
+      return (str || "").trim().toLowerCase();
+    }
 
-    [pastInput, ppInput].forEach(input => {
-      input.addEventListener("keydown", e => {
-        if (e.key === "Enter") checkAnswer();
+    function resolveTargetField() {
+      if (state.tenseType === "mixed") return Math.random() > 0.5 ? "past" : "pp";
+      return state.tenseType;
+    }
+
+    function safeBeep(ok = true) {
+      if (!state.soundOn) return;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = ok ? 720 : 300;
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      gain.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+      osc.start(now);
+      osc.stop(now + 0.18);
+    }
+
+    function renderWordTable() {
+      const tbody = $("verbTableBody");
+      tbody.innerHTML = VERBS.map((v, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${v.base}</td>
+          <td>${v.past.join(" / ")}</td>
+          <td>${v.pp.join(" / ")}</td>
+          <td>${v.zh}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderChips() {
+      modeChips.innerHTML = Object.entries(MODES).map(([key, m]) =>
+        `<button type="button" class="chip ${state.mode === key ? "active" : ""}" data-mode="${key}">${m.label}</button>`
+      ).join("");
+
+      tenseChips.innerHTML = Object.entries(TENSE_TYPES).map(([key, label]) =>
+        `<button type="button" class="chip ${state.tenseType === key ? "active" : ""}" data-tense="${key}">${label}</button>`
+      ).join("");
+    }
+
+    function updateStatus() {
+      const total = state.queue.length + state.answered;
+      $("modeLabel").textContent = MODES[state.mode].label;
+      $("scoreLabel").textContent = state.score;
+      $("comboLabel").textContent = `x${state.combo}`;
+      $("progressLabel").textContent = `${state.answered}/${total}`;
+      $("remainLabel").textContent = state.queue.length;
+      const percent = total ? (state.answered / total) * 100 : 0;
+      $("progressFill").style.width = `${percent}%`;
+      if (state.mode === "speed") {
+        $("timerWrap").hidden = false;
+        $("timerLabel").textContent = state.remainSeconds;
+      } else {
+        $("timerWrap").hidden = true;
+      }
+    }
+
+    function setFeedback(msg, type = "idle") {
+      feedback.className = `feedback ${type}`;
+      feedback.textContent = msg;
+      feedback.classList.remove("highlight");
+      void feedback.offsetWidth;
+      feedback.classList.add("highlight");
+    }
+
+    function buildQueue() {
+      const pool = state.wrongOnly && state.wrongItems.length
+        ? state.wrongItems.map(item => item.verb)
+        : VERBS;
+      const picked = shuffle(pool);
+      const rounds = Math.min(MODES[state.mode].rounds, picked.length);
+      state.queue = picked.slice(0, rounds).map(v => ({ verb: v, targetField: resolveTargetField() }));
+      if (state.mode === "double") {
+        state.queue = picked.slice(0, rounds).map(v => ({ verb: v, targetField: "both" }));
+      }
+    }
+
+    function startGame() {
+      clearInterval(state.timer);
+      state.score = 0;
+      state.combo = 0;
+      state.bestCombo = 0;
+      state.answered = 0;
+      state.correct = 0;
+      state.answeredLocked = false;
+      if (!state.wrongRetryMode) {
+        state.wrongItems = [];
+      }
+
+      buildQueue();
+      if (state.mode === "speed") {
+        state.remainSeconds = MODES.speed.seconds;
+        state.timer = setInterval(() => {
+          state.remainSeconds -= 1;
+          updateStatus();
+          if (state.remainSeconds <= 0) {
+            endGame();
+          }
+        }, 1000);
+      }
+      showScreen("game");
+      renderNextQuestion();
+      updateStatus();
+    }
+
+    function buildChoices(correctAns, fieldName) {
+      const wrongPool = shuffle(VERBS
+        .map(v => v[fieldName][0])
+        .filter(item => normalize(item) !== normalize(correctAns))
+      ).slice(0, 3);
+      return shuffle([correctAns, ...wrongPool]);
+    }
+
+    function renderNextQuestion() {
+      state.answeredLocked = false;
+      nextBtn.hidden = true;
+      choiceArea.innerHTML = "";
+      submitBtn.hidden = true;
+      inputArea.hidden = true;
+
+      if (!state.queue.length) {
+        endGame();
+        return;
+      }
+
+      state.current = state.queue.shift();
+      const { verb, targetField } = state.current;
+      $("questionMain").textContent = verb.base;
+      $("questionSub").textContent = `中文：${verb.zh}`;
+
+      if (state.mode === "double") {
+        $("questionType").textContent = "双空挑战：请同时填写过去式和过去分词";
+        inputArea.hidden = false;
+        submitBtn.hidden = false;
+        $("pastInput").value = "";
+        $("ppInput").value = "";
+        $("pastInput").focus();
+      } else {
+        const label = targetField === "past" ? "过去式（past）" : "过去分词（pp）";
+        $("questionType").textContent = `配对选择：请选择 ${label}`;
+        const correct = verb[targetField][0];
+        state.options = buildChoices(correct, targetField);
+
+        state.options.forEach((opt, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "choice-btn";
+          btn.type = "button";
+          btn.dataset.index = idx;
+          btn.innerHTML = `<small>${idx + 1}</small>${opt}`;
+          btn.addEventListener("click", () => handleChoice(idx));
+          choiceArea.appendChild(btn);
+        });
+      }
+
+      setFeedback("请作答！", "idle");
+      updateStatus();
+    }
+
+    function gainScore(isCorrect) {
+      if (isCorrect) {
+        state.correct += 1;
+        state.combo += 1;
+        state.bestCombo = Math.max(state.bestCombo, state.combo);
+        const bonus = state.combo >= 3 ? 2 : 0;
+        state.score += 10 + bonus;
+        return bonus;
+      }
+      state.combo = 0;
+      return 0;
+    }
+
+    function rememberWrong() {
+      const exists = state.wrongItems.some(item => item.verb.base === state.current.verb.base);
+      if (!exists) state.wrongItems.push({ ...state.current });
+    }
+
+    function lockQuestion() {
+      state.answeredLocked = true;
+      state.answered += 1;
+      nextBtn.hidden = state.mode === "speed";
+      submitBtn.disabled = true;
+      updateStatus();
+    }
+
+    function handleChoice(index) {
+      if (state.answeredLocked) return;
+      const { verb, targetField } = state.current;
+      const chosen = state.options[index];
+      const right = verb[targetField].map(normalize).includes(normalize(chosen));
+      const bonus = gainScore(right);
+
+      const buttons = [...choiceArea.querySelectorAll(".choice-btn")];
+      buttons.forEach((btn, i) => {
+        btn.classList.add("locked");
+        const text = state.options[i];
+        const isRight = verb[targetField].map(normalize).includes(normalize(text));
+        if (isRight) btn.classList.add("correct");
+        if (i === index && !right) btn.classList.add("wrong");
       });
-    });
 
-    pickRandom();
+      if (right) {
+        safeBeep(true);
+        const tail = bonus ? ` 连击奖励 +${bonus} 分！` : "";
+        setFeedback(`✅ ${praise[Math.floor(Math.random() * praise.length)]} +10分！${tail}`, "good");
+      } else {
+        safeBeep(false);
+        rememberWrong();
+        const ans = verb[targetField].join(" / ");
+        setFeedback(`❌ 正确答案：${ans}。别灰心，下一题拿分！`, "bad");
+      }
+
+      lockQuestion();
+      if (state.mode === "speed") setTimeout(renderNextQuestion, 550);
+    }
+
+    function handleDoubleSubmit() {
+      if (state.answeredLocked) return;
+      const { verb } = state.current;
+      const p1 = normalize($("pastInput").value);
+      const p2 = normalize($("ppInput").value);
+      const ok1 = verb.past.map(normalize).includes(p1);
+      const ok2 = verb.pp.map(normalize).includes(p2);
+      const right = ok1 && ok2;
+      const bonus = gainScore(right);
+
+      if (right) {
+        safeBeep(true);
+        const tail = bonus ? ` 连击奖励 +${bonus} 分！` : "";
+        setFeedback(`✅ 双空全对！ +10分！${tail}`, "good");
+      } else {
+        safeBeep(false);
+        rememberWrong();
+        setFeedback(`❌ 正确：past=${verb.past.join("/")}，pp=${verb.pp.join("/")}`, "bad");
+      }
+
+      lockQuestion();
+      if (state.mode === "speed") setTimeout(renderNextQuestion, 550);
+    }
+
+    function endGame() {
+      clearInterval(state.timer);
+      state.timer = null;
+      showScreen("result");
+
+      const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
+      $("finalScore").textContent = state.score;
+      $("correctCount").textContent = state.correct;
+      $("answerCount").textContent = state.answered;
+      $("accuracy").textContent = `${accuracy}%`;
+      $("bestCombo").textContent = `x${state.bestCombo}`;
+      $("wrongCount").textContent = state.wrongItems.length;
+      $("retryWrongBtn").disabled = state.wrongItems.length === 0;
+
+      let medal = "🥉";
+      let text = "继续努力，下一轮会更好！";
+      if (accuracy >= 90) { medal = "🏆🏆🏆"; text = "班级王者！同学们可以挑战你了！"; }
+      else if (accuracy >= 75) { medal = "🥇🥇"; text = "表现很棒，课堂节奏掌握得很好！"; }
+      else if (accuracy >= 60) { medal = "🥈"; text = "不错！再练错题就能冲高分！"; }
+
+      $("medal").textContent = medal;
+      $("resultText").textContent = text;
+    }
+
+    function bindEvents() {
+      modeChips.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-mode]");
+        if (!btn) return;
+        state.mode = btn.dataset.mode;
+        renderChips();
+      });
+
+      tenseChips.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-tense]");
+        if (!btn) return;
+        state.tenseType = btn.dataset.tense;
+        renderChips();
+      });
+
+      $("toggleSound").addEventListener("click", () => {
+        state.soundOn = !state.soundOn;
+        $("toggleSound").textContent = state.soundOn ? "🔊 音效：开" : "🔇 音效：关";
+        $("toggleSound").classList.toggle("active", state.soundOn);
+      });
+
+      $("toggleWrongOnly").addEventListener("click", () => {
+        state.wrongOnly = !state.wrongOnly;
+        $("toggleWrongOnly").textContent = state.wrongOnly ? "错题优先：开" : "错题优先：关";
+        $("toggleWrongOnly").classList.toggle("active", state.wrongOnly);
+      });
+
+      $("startBtn").addEventListener("click", () => {
+        state.wrongRetryMode = false;
+        startGame();
+      });
+
+      submitBtn.addEventListener("click", handleDoubleSubmit);
+      nextBtn.addEventListener("click", () => {
+        submitBtn.disabled = false;
+        renderNextQuestion();
+      });
+
+      $("backBtn").addEventListener("click", () => {
+        clearInterval(state.timer);
+        showScreen("start");
+      });
+
+      $("retryWrongBtn").addEventListener("click", () => {
+        state.wrongRetryMode = true;
+        state.wrongOnly = true;
+        $("toggleWrongOnly").textContent = "错题优先：开";
+        $("toggleWrongOnly").classList.add("active");
+        showScreen("start");
+      });
+
+      $("playAgainBtn").addEventListener("click", () => {
+        state.wrongRetryMode = false;
+        showScreen("start");
+      });
+
+      $("toHomeBtn").addEventListener("click", () => {
+        state.wrongRetryMode = false;
+        showScreen("start");
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (!screens.game.classList.contains("active")) return;
+        if (state.mode !== "double" && !state.answeredLocked && ["1", "2", "3", "4"].includes(e.key)) {
+          handleChoice(Number(e.key) - 1);
+        }
+        if (e.key === "Enter") {
+          if (state.mode === "double" && !submitBtn.hidden) {
+            handleDoubleSubmit();
+          } else if (state.answeredLocked && !nextBtn.hidden) {
+            submitBtn.disabled = false;
+            renderNextQuestion();
+          }
+        }
+      });
+    }
+
+    renderWordTable();
+    renderChips();
+    bindEvents();
   </script>
 </body>
 </html>
